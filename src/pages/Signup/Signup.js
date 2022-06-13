@@ -7,23 +7,26 @@ import {
   Input,
   FormErrorMessage,
 } from '../../styles/GlobalStyled';
-import { Wrapper, RegisterWrapper, FormWrapper, Form } from './Register.styled';
-import { toast } from 'react-toastify';
+import { Wrapper, RegisterWrapper, FormWrapper, Form } from './Signup.styled';
 import { useNavigate } from 'react-router-dom';
 //Redux
 import { useDispatch } from 'react-redux';
-import { addRegisteredUser } from '../../redux/userReducer';
+import { loggedUser, userStatus } from '../../redux/userReducer';
 
 // Import firebase
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+
 import { auth } from '../../auth/firebase';
 
 // Import useForm
 import { useForm } from 'react-hook-form';
+import { Navigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { addNewAccount } from '../../redux/accountsReducer';
 
-const Register = () => {
+const SignUp = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const naviagate = useNavigate();
 
   const {
     register,
@@ -39,46 +42,39 @@ const Register = () => {
   });
 
   const onSubmit = async (values) => {
-    const { mail, password, password_confirmation } = values;
+    const { mail, password } = values;
 
-    if (password !== password_confirmation) {
-      toast.error('Passwords must be the same! Try once again');
-      return;
-    }
-
-    await createUserWithEmailAndPassword(auth, mail, password)
+    await signInWithEmailAndPassword(auth, mail, password)
       .then((userCredential) => {
+        // Signed in
         const user = userCredential.user;
+        console.log(user);
         dispatch(
-          addRegisteredUser({
+          loggedUser({
             userName: user.email,
             userId: user.uid,
             isVerified: user.emailVerified,
+            isLogged: true,
           })
         );
-        toast.success('You are register! Now you can login!');
-        setTimeout(() => {
-          navigate('/signup');
-        }, 1500);
+        dispatch(userStatus(true));
+        toast.success(`Your are logged in as ${user.email}`);
+        naviagate('/');
       })
-      .catch((err) => {
-        console.log(err.message);
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(error);
       });
 
     reset();
   };
 
-  const prices = [20, 11, 10, 100, 21];
-
-  const newPrices = [...prices];
-
-  console.log(Math.min(...prices));
-
   return (
     <Wrapper>
       <Container>
         <RegisterWrapper>
-          <Title center>Register</Title>
+          <Title center>Signup</Title>
           <FormWrapper>
             <Form onSubmit={handleSubmit(onSubmit)}>
               <FlexWrapper>
@@ -104,22 +100,6 @@ const Register = () => {
                 <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
               </FlexWrapper>
 
-              <FlexWrapper>
-                <Input
-                  type="password"
-                  {...register('password_confirmation', {
-                    required: 'This filed is required',
-                    minLength: {
-                      value: 4,
-                      message: 'min 4 characters',
-                    },
-                  })}
-                  placeholder="Confirm password*"
-                />
-                <FormErrorMessage>
-                  {errors.password_confirmation?.message}
-                </FormErrorMessage>
-              </FlexWrapper>
               <Button width="50%" type="submit">
                 Submit
               </Button>
@@ -131,4 +111,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default SignUp;
