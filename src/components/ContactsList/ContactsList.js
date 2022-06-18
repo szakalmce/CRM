@@ -1,61 +1,74 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { Table, Td, Th, Tr } from './ContactsList.styled';
 import { useSelector, useDispatch } from 'react-redux';
-import { Table, Td, Th, Tr } from './AccountsList.styled';
-import { NavLink } from 'react-router-dom';
-import { getCurrentItem, removeAccount } from '../../redux/accountsReducer';
 import { Title } from '../../styles/GlobalStyled';
+import { useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import { getCurrentContact, removeContact } from '../../redux/accountsReducer';
 
-const AccountsList = ({ setOpenModal }) => {
-  const currentUser = useSelector((state) => state.user.currentUser);
+const ContactsList = ({ setOpenModal }) => {
+  const contacts = useSelector((state) => state.accounts.contacts);
   const accounts = useSelector((state) => state.accounts.accounts);
-  const location = useLocation();
+  const currentUser = useSelector((state) => state.user.currentUser);
   const dispatch = useDispatch();
 
+  const location = useLocation();
   const { pathname } = location;
 
-  const accountsList = useSelector((state) =>
-    state.accounts.accounts.slice(0, 5)
+  const contactsList = useSelector((state) =>
+    state.accounts.contacts.slice(0, 5)
   );
 
+  // current account name
+
   const handleRemove = (item) => {
-    dispatch(removeAccount(item));
+    dispatch(removeContact(item));
   };
 
   const handleCurrentItem = (item) => {
-    dispatch(getCurrentItem(item));
+    dispatch(getCurrentContact(item));
   };
 
   return (
     <>
       {pathname === '/dashboard' ? (
-        accountsList.length === 0 ? null : (
+        contactsList.length === 0 ? null : (
           <>
             <Title mb="2rem" center small>
-              Last accounts added (5)
+              Last contacts added (5)
             </Title>
             <Table>
               <tbody>
                 <Tr>
-                  <Th>Account Name</Th>
-                  <Th>City</Th>
-                  <Th>Category</Th>
-                  <Th>Status</Th>
+                  <Th>Name</Th>
+                  <Th>Surname</Th>
+                  <Th>Account</Th>
+                  <Th>Last contact date</Th>
                   <Th>Actions</Th>
                 </Tr>
 
-                {accountsList.map((item, index) => (
+                {contactsList.map((item, index) => (
                   <Tr key={index}>
                     <Td>
                       <NavLink
+                        onClick={() => dispatch(getCurrentContact(item))}
                         state={{ ...item }}
-                        to={`/accounts/${item.accountName}`}
+                        to={`/contacts/${item.name}`}
                       >
-                        {item.accountName}{' '}
+                        {item.name}{' '}
                       </NavLink>
                     </Td>
-                    <Td>{item.city}</Td>
-                    <Td>{item.category}</Td>
+                    <Td>{item.surname}</Td>
+                    <Td>
+                      <NavLink
+                        state={accounts.find(
+                          (account) => account.accountId === item.accountId
+                        )}
+                        to={`/accounts/${item.accountName}`}
+                      >
+                        {item.accountName}
+                      </NavLink>
+                    </Td>
                     <Td>{item.status}</Td>
                     <Td>
                       {item.accountUserId === currentUser.userId ? (
@@ -69,7 +82,7 @@ const AccountsList = ({ setOpenModal }) => {
                           onClick={() => {
                             setOpenModal({
                               value: true,
-                              type: 'account',
+                              type: 'contact',
                             });
                             handleCurrentItem(item);
                           }}
@@ -82,10 +95,10 @@ const AccountsList = ({ setOpenModal }) => {
                 ))}
               </tbody>
             </Table>
-            <NavLink to="/accounts">Show all...</NavLink>
+            <NavLink to="/contacts">Show all...</NavLink>
           </>
         )
-      ) : accounts.length === 0 ? null : (
+      ) : contacts.length === 0 ? null : (
         <>
           <Title mb="2rem" center small>
             All Accounts
@@ -93,25 +106,31 @@ const AccountsList = ({ setOpenModal }) => {
           <Table>
             <tbody>
               <Tr>
-                <Th>Account Name</Th>
-                <Th>City</Th>
-                <Th>Category</Th>
-                <Th>Status</Th>
+                <Th>Name</Th>
+                <Th>Surname</Th>
+                <Th>Account</Th>
+                <Th>Last contact date</Th>
                 <Th>Actions</Th>
               </Tr>
 
-              {accounts.map((item, index) => (
+              {contacts.map((item, index) => (
                 <Tr key={index}>
                   <Td>
-                    <NavLink
-                      state={{ ...item }}
-                      to={`/accounts/${item.accountName}`}
-                    >
-                      {item.accountName}{' '}
+                    <NavLink state={{ ...item }} to={`/contacts/${item.name}`}>
+                      {item.name}
                     </NavLink>
                   </Td>
-                  <Td>{item.city}</Td>
-                  <Td>{item.category}</Td>
+                  <Td>{item.surname}</Td>
+                  <Td>
+                    <NavLink
+                      state={accounts.find(
+                        (account) => account.accountId === item.accountId
+                      )}
+                      to={`/accounts/${item.accountName}`}
+                    >
+                      {item.accountName}
+                    </NavLink>
+                  </Td>
                   <Td>{item.status}</Td>
                   <Td>
                     {item.accountUserId === currentUser.userId ? (
@@ -125,7 +144,7 @@ const AccountsList = ({ setOpenModal }) => {
                         onClick={() => {
                           setOpenModal({
                             value: true,
-                            type: 'account',
+                            type: 'contact',
                           });
                           handleCurrentItem(item);
                         }}
@@ -144,4 +163,4 @@ const AccountsList = ({ setOpenModal }) => {
   );
 };
 
-export default AccountsList;
+export default ContactsList;

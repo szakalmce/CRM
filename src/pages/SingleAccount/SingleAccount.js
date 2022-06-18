@@ -16,6 +16,8 @@ const SingleAccount = () => {
   const { accountName, city, category, status, accountUserId, accountId } =
     location.state;
 
+  console.log(location.state);
+
   const [addContactForm, setAddContactForm] = useState(false);
   const [isAccountOwner, setIsAccountOwner] = useState(false);
 
@@ -32,7 +34,7 @@ const SingleAccount = () => {
   // i pojawi się nowy już nie
   useEffect(() => {
     const test = users.find((user) => user.userId === accountUserId);
-    console.log(test);
+
     if (test.userId === currentUser.userId) {
       setIsAccountOwner(true);
     } else {
@@ -58,7 +60,8 @@ const SingleAccount = () => {
       email: '',
       accountId: '',
       id: '',
-      idEdit: false,
+      accountName: '',
+      actions: [],
     },
   });
 
@@ -73,7 +76,8 @@ const SingleAccount = () => {
         accountUserId: accountUserId,
         accountId: accountId,
         id: Math.random(),
-        isEdit: false,
+        accountName: accountName,
+        actions: [],
       })
     );
 

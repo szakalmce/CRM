@@ -8,7 +8,7 @@ const initialState = {
     ? JSON.parse(localStorage.getItem('contacts'))
     : [],
   currentItem: [],
-  editItem: [],
+  currentContact: [],
 };
 
 const accountsReducer = createSlice({
@@ -87,6 +87,75 @@ const accountsReducer = createSlice({
 
       window.localStorage.setItem('contacts', JSON.stringify(state.contacts));
     },
+    removeContact: (state, action) => {
+      const newContacts = state.contacts.filter(
+        (contact) => contact.id !== action.payload.id
+      );
+
+      state.contacts = newContacts;
+
+      window.localStorage.setItem('contacts', JSON.stringify(state.contacts));
+    },
+    editContact: (state, action) => {
+      const findItem = state.contacts.findIndex(
+        (item) => item.accountId === action.payload.accountId
+      );
+
+      state.contacts[findItem] = action.payload;
+      state.currentContact = action.payload;
+
+      window.localStorage.setItem('contacts', JSON.stringify(state.contacts));
+    },
+    getCurrentContact: (state, action) => {
+      state.currentContact = action.payload;
+
+      // źle skonstuowane (powinno być w osobnym elemencie)
+    },
+    addActions: (state, action) => {
+      // pchanie dodawanie akcji do pojedynczego kontaktu
+
+      // znalezienie indeksu aktualnego kontaktu
+      const findIndex = state.contacts.findIndex(
+        (contact) => contact.id === action.payload.id
+      );
+
+      // stworzyć obiekt z nazwą konkretnej akcji
+      const contactsCopy = state.contacts.slice();
+
+      console.log(contactsCopy[findIndex]);
+
+      // dodanie key = actions i wrzucanie wszystkiego tam
+      if (action.payload.type === 'phone') {
+        if (!contactsCopy[findIndex].actions) {
+          contactsCopy[findIndex].actions = [action.payload];
+          console.log(contactsCopy[findIndex]);
+        } else {
+          contactsCopy[findIndex].actions.push(action.payload);
+        }
+      }
+
+      if (action.payload.type === 'note') {
+        if (!contactsCopy[findIndex].actions) {
+          contactsCopy[findIndex].actions = [action.payload];
+        } else {
+          contactsCopy[findIndex].actions.push(action.payload);
+        }
+      }
+
+      if (action.payload.type === 'email') {
+        if (!contactsCopy[findIndex].actions) {
+          contactsCopy[findIndex].actions = [action.payload];
+        } else {
+          contactsCopy[findIndex].actions.push(action.payload);
+        }
+      }
+
+      state.currentContact = contactsCopy[findIndex];
+
+      state.contacts = contactsCopy;
+
+      window.localStorage.setItem('contacts', JSON.stringify(state.contacts));
+    },
   },
 });
 
@@ -96,6 +165,10 @@ export const {
   removeAccount,
   editAccount,
   getCurrentItem,
+  removeContact,
+  getCurrentContact,
+  editContact,
+  addActions,
 } = accountsReducer.actions;
 
 export default accountsReducer.reducer;
